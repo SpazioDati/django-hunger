@@ -1,1 +1,3 @@
-Visit {{ invite_url }} to join the private beta.
+{% if custom_message %}{{ custom_message }}
+
+{% endif%}Visit {{ invite_url }} to join the private beta.

@@ -1,0 +1,21 @@
+{% extends 'admin/base_site.html' %}
+{% load i18n admin_static admin_modify %}
+{% load admin_urls %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+        &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ app_label|capfirst|escape }}</a>
+        &rsaquo; {% if has_change_permission %}<a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %}
+        &rsaquo; {% trans "Send invitation code" %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div id="content-main">
+        <form method="post" id="{{ opts.module_name }}_form">{% csrf_token %}
+            {{ form }}
+            <input type="submit" value="{% trans "Send invitation email" %}" />
+        </form>
+    </div>
+{% endblock %}

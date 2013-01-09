@@ -76,11 +76,13 @@ def beta_invite(email, code, request, **kwargs):
             file_extension=file_extension,
         )
     else:
+        from django.utils.html import strip_tags
         plaintext = get_template(os.path.join(templates_folder, 'beta_invite.txt'))
         html = get_template(os.path.join(templates_folder, 'beta_invite.html'))
 
+        print context, type(context['custom_message'])
         subject, to = "Here is your invite", email
-        text_content = plaintext.render(context)
+        text_content = strip_tags(plaintext.render(context).replace('<br/>',  '\n'))
         html_content = html.render(context)
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to],
                                      headers={'From': '%s' % from_email})
