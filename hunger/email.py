@@ -1,7 +1,8 @@
 import os.path
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
-from django.template.loader import get_template
+from django.utils.translation import ugettext as _
+from django.template.loader import get_template, render_to_string
 from django.template import Context
 from hunger.utils import setting
 
@@ -37,10 +38,11 @@ def beta_confirm(email, **kwargs):
     else:
         plaintext = get_template(os.path.join(templates_folder, 'beta_confirm.txt'))
         html = get_template(os.path.join(templates_folder, 'beta_confirm.html'))
-        subject, to = 'You requested an invite!', email
+        subject = render_to_string(os.path.join(templates_folder, 'beta_confirm_subject.txt'), context_dict)
+
         text_content = plaintext.render(Context())
         html_content = html.render(Context())
-        msg = EmailMultiAlternatives(subject, text_content, from_email, [to],
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [email],
                                      headers={'From': '%s' % from_email})
         msg.attach_alternative(html_content, "text/html")
         msg.send()
@@ -79,12 +81,11 @@ def beta_invite(email, code, request, **kwargs):
         from django.utils.html import strip_tags
         plaintext = get_template(os.path.join(templates_folder, 'beta_invite.txt'))
         html = get_template(os.path.join(templates_folder, 'beta_invite.html'))
+        subject = render_to_string(os.path.join(templates_folder, 'beta_invite_subject.txt'), context)
 
-        print context, type(context['custom_message'])
-        subject, to = "Here is your invite", email
         text_content = strip_tags(plaintext.render(context).replace('<br/>',  '\n'))
         html_content = html.render(context)
-        msg = EmailMultiAlternatives(subject, text_content, from_email, [to],
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [email],
                                      headers={'From': '%s' % from_email})
         msg.attach_alternative(html_content, "text/html")
         msg.send()

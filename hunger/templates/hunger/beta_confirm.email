@@ -1,6 +1,7 @@
-{% block subject %}You requested an invite!{% endblock %}
+{% load i18n %}
+{% block subject %}{% blocktrans %}You requested an invite!{% endblocktrans %}{% endblock %}
 
 {% block plain %}
-  We have received your request for invite to the private beta.
-  We'll contact you as soon as we are ready!
+  {% blocktrans %}We have received your request for invite to the private beta.
+  We'll contact you as soon as we are ready!{% endblocktrans %}
 {% endblock %}

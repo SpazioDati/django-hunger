@@ -1,9 +1,13 @@
-{% block subject %}Here is your invite{% endblock %}
+{% load i18n %}
+
+{% block subject %}{% blocktrans %}Here is your invite{% endblocktrans %}{% endblock %}
 
 {% block plain %}
-  Visit {{ invite_url }} to join the private beta.
+  {% blocktrans %}Visit {{ invite_url }} to join the private beta.{% endblocktrans %}
 {% endblock %}
 
 {% block html %}
-  Visit <a href="{{ invite_url }}" target="_blank">{{ invite_url }}</a> to join the private beta.
+    {% blocktrans %}
+        Visit <a href="{{ invite_url }}" target="_blank">{{ invite_url }}</a> to join the private beta.
+    {% endblocktrans %}
 {% endblock %}
