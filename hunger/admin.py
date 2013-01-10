@@ -15,8 +15,8 @@ invite_sent.connect(invitation_code_sent)
 
 class InvitationCodeAdmin(admin.ModelAdmin):
     """Admin for invitation code"""
-    list_display = ('code', 'is_used', 'is_invited', 'email', 'user', 'created', 'invited', 'used', )
-    list_filter = ('is_used', 'is_invited', 'created', 'invited', 'used')
+    list_display = ('code', 'is_used', 'is_invited', 'email', 'user', 'user_lang', 'created', 'invited', 'used', )
+    list_filter = ('is_used', 'is_invited', 'created', 'invited', 'used', 'user_lang')
     search_fields = ['email']
     actions = ['send_invite', 'resend_invite', 'export_email']
 

@@ -16,6 +16,13 @@ class InvitationCodeCreate(CreateView):
     form_class = InviteRequestForm
     success_url = reverse_lazy('beta_confirmation')
 
+    def form_valid(self, form):
+        response = super(InvitationCodeCreate, self).form_valid(form)
+        if hasattr(self.request, 'LANGUAGE_CODE'):
+            self.object.user_lang = self.request.LANGUAGE_CODE
+            self.object.save()
+        return response
+
 
 class ConfirmationView(TemplateView):
     """

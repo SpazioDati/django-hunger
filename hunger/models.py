@@ -15,6 +15,7 @@ class InvitationCode(models.Model):
 
     email = models.EmailField(_('Email address'), unique=True)
     user = models.ForeignKey(User, blank=True, null=True, default=None)
+    user_lang = models.CharField(blank=True, null=True, default='en-us', max_length=10)
 
     created = models.DateTimeField(_('Created'), auto_now_add=True)
     invited = models.DateTimeField(_(u"Invited"), blank=True, null=True)
