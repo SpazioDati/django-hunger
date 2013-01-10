@@ -108,15 +108,22 @@ class InvitationCodeAdmin(admin.ModelAdmin):
         return self.send_invite(request, queryset, action='resend')
 
     def _send_invitation_email(self, request, queryset, action, custom_message=''):
+        from django.utils import translation
+
         n_sent = 0
         for obj in queryset:
             if (action == 'send' and not obj.is_invited) \
                     or (action == 'resend' and obj.is_invited):
-                invite_sent.send(sender=self.__class__, email=obj.email,
-                                 invitation_code=obj.code,
-                                 user=obj.user, request=request,
-                                 custom_message=custom_message)
-                n_sent += 1
+                cur_language = translation.get_language()
+                try:
+                    translation.activate(obj.user_lang)
+                    invite_sent.send(sender=self.__class__, email=obj.email,
+                        invitation_code=obj.code,
+                        user=obj.user, request=request,
+                        custom_message=custom_message)
+                    n_sent += 1
+                finally:
+                    translation.activate(cur_language)
 
         messages.info(request,
             _('{0} invitation emails sent correctly.').format(n_sent)
