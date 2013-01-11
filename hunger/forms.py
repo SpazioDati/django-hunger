@@ -10,6 +10,10 @@ class InviteRequestForm(forms.ModelForm):
 
 
 class InvitationEmailForm(forms.Form):
-    message = forms.CharField(widget=forms.Textarea, help_text=_('Also accepts HTML code'))
+    message = forms.CharField(
+        widget=forms.Textarea,
+        help_text=_('Also accepts HTML code'),
+        required=False
+    )
     ids = forms.CharField(widget=forms.HiddenInput)
     action = forms.CharField(widget=forms.HiddenInput)
