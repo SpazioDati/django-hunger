@@ -12,6 +12,7 @@ class InviteRequestForm(forms.ModelForm):
 class InvitationEmailForm(forms.Form):
     message = forms.CharField(
         widget=forms.Textarea,
-        help_text=_('Also accepts HTML code'),
+        help_text=_('Also accepts HTML code. The text "{invite_url}" is '
+                    'a placeholder for the actual invitation url.'),
         required=False
     )
