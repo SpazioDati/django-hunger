@@ -1,10 +1,11 @@
 import csv
 from datetime import datetime
-from django.conf import settings
 from django.contrib import admin, messages
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
+from django.utils.safestring import mark_safe
 from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
 from hunger.models import InvitationCode
 from hunger.signals import invite_sent
 from hunger.receivers import invitation_code_sent
@@ -18,17 +19,44 @@ class InvitationCodeAdmin(admin.ModelAdmin):
     list_display = ('code', 'is_used', 'is_invited', 'email', 'user', 'user_lang', 'created', 'invited', 'used', )
     list_filter = ('is_used', 'is_invited', 'created', 'invited', 'used', 'user_lang')
     search_fields = ['email']
-    actions = ['send_invite', 'resend_invite', 'export_email']
+    actions = ['send_invite', 'resend_invite', 'personalize_invite', 'export_email']
 
     def get_urls(self):
         from django.conf.urls import patterns, url
 
         urlpatterns = super(InvitationCodeAdmin, self).get_urls()
         extra_urls = patterns('',
+            url(r'^confirm-invite/$', self.confirm_invite,
+             name='hunger_invitationcode_confirminvite'),
             url(r'^send-invitation-code/$', self.send_invitation_code,
              name='hunger_invitationcode_sendinvite'),
         )
         return extra_urls + urlpatterns
+
+    def confirm_invite(self, request):
+        ids = request.GET.get('ids', '').split(',')
+
+        if request.method == 'POST':
+            queryset = InvitationCode.objects.filter(pk__in=ids)
+            self._send_invitation_email(
+                request, queryset, request.GET.get('action'),
+            )
+            return HttpResponseRedirect(
+                reverse('admin:hunger_invitationcode_changelist')
+            )
+
+        context = {
+            'app_label': self.opts.app_label,
+            'has_change_permission': self.has_change_permission(request),
+            'current_app': self.admin_site.name,
+            'opts': self.model._meta,
+            'action': request.GET.get('action'),
+            'object_list': InvitationCode.objects.filter(pk__in=ids)
+        }
+        return render(request,
+            'admin/hunger/invitationcode/confirm_invite.html',
+            context
+        )
 
     def send_invitation_code(self, request):
         from django.shortcuts import render
@@ -92,20 +120,28 @@ class InvitationCodeAdmin(admin.ModelAdmin):
         return response
 
     def send_invite(self, request, queryset, action='send'):
-        if not getattr(settings, 'BETA_INVITATION_CUSTOM_MESSAGE', False):
-            self._send_invitation_email(request, queryset, action)
-            return
-
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
         return HttpResponseRedirect(
             '{0}?ids={1}&action={2}'.format(
-                reverse('admin:hunger_invitationcode_sendinvite'),
+                reverse('admin:hunger_invitationcode_confirminvite'),
                 ','.join(selected), action
             )
         )
 
     def resend_invite(self, request, queryset):
         return self.send_invite(request, queryset, action='resend')
+
+    def personalize_invite(self, request, queryset):
+        if queryset.count() != 1:
+            messages.error(request, "You can personalize only one invitation at a time.")
+            return
+        selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
+        return HttpResponseRedirect(
+            '{0}?ids={1}'.format(
+                reverse('admin:hunger_invitationcode_sendinvite'),
+                ','.join(selected)
+            )
+        )
 
     def _send_invitation_email(self, request, queryset, action, custom_message=''):
         from django.utils import translation
@@ -126,7 +162,7 @@ class InvitationCodeAdmin(admin.ModelAdmin):
                     translation.activate(cur_language)
 
         messages.info(request,
-            _('{0} invitation emails sent correctly.').format(n_sent)
+            _('{0} invitation email(s) sent correctly.').format(n_sent)
         )
 
 
