@@ -79,12 +79,19 @@ def beta_invite(email, code, request, **kwargs):
         )
     else:
         from django.utils.html import strip_tags
-        plaintext = get_template(os.path.join(templates_folder, 'beta_invite.txt'))
-        html = get_template(os.path.join(templates_folder, 'beta_invite.html'))
-        subject = render_to_string(os.path.join(templates_folder, 'beta_invite_subject.txt'), context)
+        if not kwargs.get('custom_message'):
+            plaintext = get_template(os.path.join(templates_folder, 'beta_invite.txt'))
+            html = get_template(os.path.join(templates_folder, 'beta_invite.html'))
+            text_content = plaintext.render(context)
+            html_content = html.render(context)
+        else:
+            html_content = kwargs.get('custom_message').format(invite_url=context_dict['invite_url'])
+            text_content = strip_tags(html_content.replace('\n', '')
+                                                  .replace('\r', '')
+                                                  .replace('<br/>',  '\n')
+                                                  .replace('<br>',  '\n'))
 
-        text_content = strip_tags(plaintext.render(context).replace('<br/>',  '\n'))
-        html_content = html.render(context)
+        subject = render_to_string(os.path.join(templates_folder, 'beta_invite_subject.txt'), context)
         msg = EmailMultiAlternatives(subject, text_content, from_email, [email],
                                      headers={'From': '%s' % from_email})
         msg.attach_alternative(html_content, "text/html")

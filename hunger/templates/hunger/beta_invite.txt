@@ -1,3 +1,1 @@
-{% load i18n %}{% if custom_message %}{{ custom_message }}
-
-{% endif%}{% blocktrans %}Visit {{ invite_url }} to join the private beta.{% endblocktrans %}
+{% load i18n %}{% blocktrans %}Visit {{ invite_url }} to join the private beta.{% endblocktrans %}
