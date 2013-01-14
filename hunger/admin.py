@@ -2,6 +2,8 @@ import csv
 from datetime import datetime
 from django.contrib import admin, messages
 from django.core.urlresolvers import reverse
+from django.template.loader import render_to_string
+from django.utils import translation
 from django.utils.translation import ugettext as _
 from django.utils.safestring import mark_safe
 from django.http import HttpResponse, HttpResponseRedirect
@@ -59,24 +61,31 @@ class InvitationCodeAdmin(admin.ModelAdmin):
         )
 
     def send_invitation_code(self, request):
-        from django.shortcuts import render
         from hunger.forms import InvitationEmailForm
-        from django.utils.safestring import mark_safe
+        ids = request.GET.get('ids').split(',')
+        obj = InvitationCode.objects.get(pk__in=ids)
 
         if request.method == "POST":
             form = InvitationEmailForm(data=request.POST)
             if form.is_valid():
-                ids = form.cleaned_data['ids'].split(',')
-                queryset = InvitationCode.objects.filter(pk__in=ids)
                 self._send_invitation_email(
-                    request, queryset, form.cleaned_data['action'],
+                    request, [obj], 'force',
                     custom_message=mark_safe(form.cleaned_data['message']),
                 )
                 return HttpResponseRedirect(
                     reverse('admin:hunger_invitationcode_changelist')
                 )
         else:
-            form = InvitationEmailForm(initial=request.GET)
+            current_lang = translation.get_language()
+            translation.activate(obj.user_lang)
+            try:
+                form = InvitationEmailForm(initial={
+                    'message': render_to_string('hunger/beta_invite.html', {
+                        'invite_url': '{invite_url}'
+                    })
+                })
+            finally:
+                translation.activate(current_lang)
 
         context = {
             'app_label': self.opts.app_label,
@@ -84,6 +93,7 @@ class InvitationCodeAdmin(admin.ModelAdmin):
             'current_app': self.admin_site.name,
             'opts': self.model._meta,
             'form': form,
+            'object': obj,
         }
         return render(request,
             'admin/hunger/invitationcode/send_invitation_code.html',
@@ -149,7 +159,8 @@ class InvitationCodeAdmin(admin.ModelAdmin):
         n_sent = 0
         for obj in queryset:
             if (action == 'send' and not obj.is_invited) \
-                    or (action == 'resend' and obj.is_invited):
+                    or (action == 'resend' and obj.is_invited) \
+                    or action == 'force':
                 cur_language = translation.get_language()
                 try:
                     translation.activate(obj.user_lang)

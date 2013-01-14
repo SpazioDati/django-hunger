@@ -13,8 +13,11 @@
 
 {% block content %}
     <div id="content-main">
+        <p>You are sending a custom invitation email to {{ object.email }}, language: <b>{{ object.user_lang }}</b></p>
         <form method="post" id="{{ opts.module_name }}_form">{% csrf_token %}
             {{ form }}
+            <br/>
+            <br/>
             <input type="submit" value="{% trans "Send invitation email" %}" />
         </form>
     </div>

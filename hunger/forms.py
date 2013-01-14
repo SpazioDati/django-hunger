@@ -15,5 +15,3 @@ class InvitationEmailForm(forms.Form):
         help_text=_('Also accepts HTML code'),
         required=False
     )
-    ids = forms.CharField(widget=forms.HiddenInput)
-    action = forms.CharField(widget=forms.HiddenInput)
