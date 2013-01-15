@@ -78,18 +78,15 @@ def beta_invite(email, code, request, **kwargs):
             file_extension=file_extension,
         )
     else:
-        from django.utils.html import strip_tags
         if not kwargs.get('custom_message'):
             plaintext = get_template(os.path.join(templates_folder, 'beta_invite.txt'))
             html = get_template(os.path.join(templates_folder, 'beta_invite.html'))
             text_content = plaintext.render(context)
             html_content = html.render(context)
         else:
+            from hunger.utils import html2plain
             html_content = kwargs.get('custom_message').format(invite_url=context_dict['invite_url'])
-            text_content = strip_tags(html_content.replace('\n', '')
-                                                  .replace('\r', '')
-                                                  .replace('<br/>',  '\n')
-                                                  .replace('<br>',  '\n'))
+            text_content = html2plain(html_content)
 
         subject = render_to_string(os.path.join(templates_folder, 'beta_invite_subject.txt'), context)
         msg = EmailMultiAlternatives(subject, text_content, from_email, [email],

@@ -20,7 +20,11 @@ CLASSIFIERS = [
     'Framework :: Django',
 ]
 
-INSTALL_REQUIRES = ['']
+INSTALL_REQUIRES = [
+    'bleach',
+    'html5lib',
+]
+
 try:
     import importlib
 except ImportError:
