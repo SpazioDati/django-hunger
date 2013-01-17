@@ -32,6 +32,8 @@ class InvitationCodeAdmin(admin.ModelAdmin):
              name='hunger_invitationcode_confirminvite'),
             url(r'^send-invitation-code/$', self.send_invitation_code,
              name='hunger_invitationcode_sendinvite'),
+            url(r'^send-invitation-preview/$', self.send_invitation_preview,
+             name='hunger_invitationcode_preview'),
         )
         return extra_urls + urlpatterns
 
@@ -53,7 +55,8 @@ class InvitationCodeAdmin(admin.ModelAdmin):
             'current_app': self.admin_site.name,
             'opts': self.model._meta,
             'action': request.GET.get('action'),
-            'object_list': InvitationCode.objects.filter(pk__in=ids)
+            'object_list': InvitationCode.objects.filter(pk__in=ids),
+            'media': self.media,
         }
         return render(request,
             'admin/hunger/invitationcode/confirm_invite.html',
@@ -94,11 +97,24 @@ class InvitationCodeAdmin(admin.ModelAdmin):
             'opts': self.model._meta,
             'form': form,
             'object': obj,
+            'media': self.media,
         }
         return render(request,
             'admin/hunger/invitationcode/send_invitation_code.html',
             context
         )
+
+    def send_invitation_preview(self, request):
+        cur_language = translation.get_language()
+        try:
+            translation.activate(request.POST.get('lang'))
+            invite_sent.send(sender=self.__class__, email=request.user.email,
+                invitation_code='invitationcode', request=request,
+                custom_message=request.POST.get('message')
+            )
+        finally:
+            translation.activate(cur_language)
+        return HttpResponse('OK')
 
     def export_email(self, request, queryset):
         response = HttpResponse(mimetype='text/csv')
@@ -154,6 +170,11 @@ class InvitationCodeAdmin(admin.ModelAdmin):
         )
 
     def _send_invitation_email(self, request, queryset, action, custom_message=''):
+        """ action can be:
+         - send: sending the email for the first time
+         - resend: resending the email
+         - force: sending the email with a custom message
+        """
         from django.utils import translation
 
         n_sent = 0
@@ -165,8 +186,7 @@ class InvitationCodeAdmin(admin.ModelAdmin):
                 try:
                     translation.activate(obj.user_lang)
                     invite_sent.send(sender=self.__class__, email=obj.email,
-                        invitation_code=obj.code,
-                        user=obj.user, request=request,
+                        invitation_code=obj.code, request=request,
                         custom_message=custom_message)
                     n_sent += 1
                 finally:

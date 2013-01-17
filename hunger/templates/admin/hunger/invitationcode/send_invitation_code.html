@@ -11,6 +11,11 @@
     </div>
 {% endblock %}
 
+{% block extrahead %}
+    {{ block.super }}
+    {{ media.js }}
+{% endblock %}
+
 {% block content %}
     <div id="content-main">
         <p>You are sending a custom invitation email to {{ object.email }}, language: <b>{{ object.user_lang }}</b></p>
@@ -19,7 +24,34 @@
             {{ form }}
             <br/>
             <br/>
-            <input type="submit" value="{% trans "Send invitation email" %}" />
+            <a id="preview_button" href="#" class="button">Send me a preview</a>
+            <input type="hidden" name="lang" value="{{ object.user_lang }}" />
+            <input type="submit" value="Send invitation email" class="default" />
         </form>
     </div>
+
+    <script>
+        (function ($) {
+            $('#preview_button').bind('click', function () {
+                var $btn = $(this);
+                $btn.html('sending...');
+
+                if (tinyMCE && tinyMCE.get("id_message")) {
+                    tinyMCE.get("id_message").save();
+                }
+
+                $.ajax({
+                    'url': '{% url 'admin:hunger_invitationcode_preview' %}',
+                    'data': $('#{{ opts.module_name }}_form').serializeArray(),
+                    'type': 'POST',
+                    'success': function (a, b){
+                        $btn.html('Success! Send again?');
+                    },
+                    'error': function (a, b){
+                        $btn.html('Error!! Retry?');
+                    }
+                })
+            });
+        })(django.jQuery);
+    </script>
 {% endblock %}
