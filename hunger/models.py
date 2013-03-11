@@ -1,8 +1,10 @@
 import string, random
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth.models import User
 from django.conf import settings
+
+from .auth import User
+
 
 def generate_invite_code():
     num_chars = getattr(settings, 'BETA_INVITE_CODE_LENGTH', 8)

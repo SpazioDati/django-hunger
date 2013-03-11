@@ -3,9 +3,10 @@ try:
 except ImportError:
     from django.utils import importlib
 
-from django.contrib.auth.models import User
 from hunger.models import InvitationCode
 from hunger.utils import setting, now
+
+from .auth import User
 
 
 def invitation_code_created(sender, email, **kwargs):
