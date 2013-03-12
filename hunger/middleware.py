@@ -61,7 +61,12 @@ class BetaMiddleware(object):
             return
 
         invitation_code = request.COOKIES.get('invitation_code', '')
-        in_beta, exists = InvitationCode.validate_code(invitation_code)
+
+        if invitation_code:
+            in_beta, exists_ = InvitationCode.validate_code(invitation_code)
+        else:
+            in_beta = False
+
         whitelisted_modules = ['django.contrib.auth.views',
                                'django.contrib.admin.sites',
                                'django.views.static',
