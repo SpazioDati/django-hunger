@@ -1,3 +1,5 @@
+import re
+
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from hunger.models import InvitationCode
@@ -50,11 +52,16 @@ class BetaMiddleware(object):
         self.signup_confirmation_view = getattr(settings, 'BETA_SIGNUP_CONFIRMATION_VIEW', '')
         self.signup_url = getattr(settings, 'BETA_SIGNUP_URL', '/register/')
         self.allow_flatpages = getattr(settings, 'BETA_ALLOW_FLATPAGES', [])
+        self.allow_urls_regex = getattr(settings, 'BETA_ALLOW_URLS_REGEX', [])
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         if request.path in self.allow_flatpages or '%s/' % request.path in self.allow_flatpages:
             from django.contrib.flatpages.views import flatpage
             return flatpage(request, request.path_info)
+
+        for url_regex in self.allow_urls_regex:
+            if re.match(url_regex, request.path):
+                return
 
         if not self.enable_beta:
             #Do nothing is beta is not activated
