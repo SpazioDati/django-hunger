@@ -64,7 +64,7 @@ class BetaMiddleware(object):
                 return
 
         if not self.enable_beta:
-            #Do nothing is beta is not activated
+            #Do nothing if beta is not activated
             return
 
         invitation_code = request.COOKIES.get('invitation_code', '')
