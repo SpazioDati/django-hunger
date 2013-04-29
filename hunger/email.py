@@ -40,10 +40,13 @@ def beta_confirm(email, **kwargs):
         html = get_template(os.path.join(templates_folder, 'beta_confirm.html'))
         subject = render_to_string(os.path.join(templates_folder, 'beta_confirm_subject.txt'), context_dict)
 
+        headers = {}
+        if setting('BETA_EMAIL_SET_FROM_HEADER', True):
+            headers['From'] = '%s' % from_email
+
         text_content = plaintext.render(Context())
         html_content = html.render(Context())
-        msg = EmailMultiAlternatives(subject, text_content, from_email, [email],
-                                     headers={'From': '%s' % from_email})
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [email], headers=headers)
         msg.attach_alternative(html_content, "text/html")
         msg.send()
 
@@ -88,8 +91,11 @@ def beta_invite(email, code, request, **kwargs):
             html_content = kwargs.get('custom_message').format(invite_url=context_dict['invite_url'])
             text_content = html2plain(html_content)
 
+        headers = {}
+        if setting('BETA_EMAIL_SET_FROM_HEADER', True):
+            headers['From'] = '%s' % from_email
+
         subject = render_to_string(os.path.join(templates_folder, 'beta_invite_subject.txt'), context)
-        msg = EmailMultiAlternatives(subject, text_content, from_email, [email],
-                                     headers={'From': '%s' % from_email})
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [email], headers=headers)
         msg.attach_alternative(html_content, "text/html")
         msg.send()
