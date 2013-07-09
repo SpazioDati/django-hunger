@@ -49,17 +49,39 @@ class MandrillMail(object):
             if child.text:
                 self.blocks[child.tag] = child.text.strip()
 
-    def send(self, from_email, recipient_list):
+    def send(self, from_email, recipient_list, **kwargs):
+        blocks = dict(self.blocks, **{k:v for k, v in kwargs.items() if v})
+        
+        title = blocks.get('title')
+        cta_link = blocks.get('cta_link')
+        cta_label = blocks.get('cta_label')
+
         msg = EmailMessage(
-            subject=self.blocks.get('subject'),
+            subject=blocks.get('subject'),
             from_email=from_email,
             to=recipient_list
         )
         msg.template_name = setting('BETA_MANDRILL_TEMPLATE')
         msg.template_content = {
-            "title": self.blocks.get('title'),
-            "body_content": self.blocks.get('html'),
-            "button_content": self.blocks.get('button_content'),
+            "title": title,
+            "body_content": blocks.get('html'),
+            "button_content": '',  # default
         }
+
+        msg.global_merge_vars = {
+            'FULLTEXTTITLE': title,
+            'FULLTEXTCONTENT': blocks.get('fulltext'),
+            'FULLTEXTCTA': '',  # default
+        }
+
+        if cta_label and cta_link:
+            msg.global_merge_vars['FULLTEXTCTA'] = '{}: {}'.format(
+                cta_link,
+                cta_label
+            )
+            msg.template_content['button_content'] = \
+                '<a href="{}" target="_blank">{}</a>'.format(
+                    cta_link, cta_label
+                )
 
         msg.send()

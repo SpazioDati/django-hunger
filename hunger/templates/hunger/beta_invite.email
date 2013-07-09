@@ -1,13 +1,25 @@
-{% load i18n %}
+{% extends 'hunger/mandrill.email' %}
 
-{% block subject %}{% blocktrans %}Here is your invite{% endblocktrans %}{% endblock %}
-
-{% block plain %}
-  {% blocktrans %}Visit {{ invite_url }} to join the private beta.{% endblocktrans %}
+{% block subject %}
+    Here is your invite
 {% endblock %}
 
+{% block title %}
+    title
+{% endblock title %}
+
 {% block html %}
-    {% blocktrans %}
-        Visit <a href="{{ invite_url }}" target="_blank">{{ invite_url }}</a> to join the private beta.
-    {% endblocktrans %}
+    html
+{% endblock %}
+
+{% block fulltext %}
+    fulltext
+{% endblock %}
+
+{% block cta_link %}
+    http://cta.link
+{% endblock %}
+
+{% block cta_label %}
+    cta label
 {% endblock %}
