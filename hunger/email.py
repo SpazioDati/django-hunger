@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 from django.template.loader import get_template, render_to_string
 from django.template import Context
-from hunger.utils import setting
+from hunger.utils import setting, MandrillMail
 
 try:
     from templated_email import send_templated_mail
@@ -26,6 +26,13 @@ def beta_confirm(email, **kwargs):
         file_extension = None
 
     context_dict = kwargs.copy()
+
+    MandrillMail('beta_confirm.email', context=context_dict).send(
+        from_email=from_email,
+        recipient_list=[email],
+    )
+    return
+
     if templated_email_available:
         send_templated_mail(
             template_name='beta_confirm',

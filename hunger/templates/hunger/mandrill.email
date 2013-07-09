@@ -1,0 +1,10 @@
+<email>
+    <subject>{% block subject %}{% endblock %}</subject>
+    <title>{% block title %}{% endblock %}</title>
+    <html>{% block html %}{% endblock %}</html>
+    <button_content>
+        <a href="{% block cta_link %}{% endblock %}" target="_blank">
+            {% block cta_label %}{% endblock %}
+        </a>
+    </button_content>
+</email>

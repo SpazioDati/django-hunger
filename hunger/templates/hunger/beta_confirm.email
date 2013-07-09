@@ -1,7 +1,13 @@
-{% load i18n %}
-{% block subject %}{% blocktrans %}You requested an invite!{% endblocktrans %}{% endblock %}
+{% extends 'hunger/mandrill.email' %}
 
-{% block plain %}
-  {% blocktrans %}We have received your request for invite to the private beta.
-  We'll contact you as soon as we are ready!{% endblocktrans %}
+{% block subject %}
+    subject
+{% endblock %}
+
+{% block title %}
+    title
+{% endblock title %}
+
+{% block html %}
+    html
 {% endblock %}
