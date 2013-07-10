@@ -82,10 +82,14 @@ class InvitationCodeAdmin(admin.ModelAdmin):
             current_lang = translation.get_language()
             translation.activate(obj.user_lang)
             try:
+                from hunger.utils import MandrillMail
+
+                mandrill = MandrillMail('hunger/beta_invite.email', {
+                    'invite_url': '{invite_url}'
+                })
+
                 form = InvitationEmailForm(initial={
-                    'message': render_to_string('hunger/beta_invite.html', {
-                        'invite_url': '{invite_url}'
-                    })
+                    'message': mandrill.blocks.get('html', '')
                 })
             finally:
                 translation.activate(current_lang)

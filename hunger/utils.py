@@ -41,11 +41,12 @@ class MandrillMail(object):
     def __init__(self, template_name, context):
         from xml.etree import cElementTree as ET
 
-        xml_body = render_to_string('hunger/' + template_name, context)
+        xml_body = render_to_string(template_name, context)
         root = ET.fromstring(xml_body)
         self.blocks = {}
 
         for child in root:
+            text = '\n'.join([x for x in child])
             if child.text:
                 self.blocks[child.tag] = child.text.strip()
 

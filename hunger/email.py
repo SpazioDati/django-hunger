@@ -27,7 +27,7 @@ def beta_confirm(email, **kwargs):
 
     context_dict = kwargs.copy()
 
-    MandrillMail('beta_confirm.email', context=context_dict).send(
+    MandrillMail('hunger/beta_confirm.email', context=context_dict).send(
         from_email=from_email,
         recipient_list=[email],
     )
@@ -54,7 +54,7 @@ def beta_invite(email, code, request, **kwargs):
         html_content = kwargs.get('custom_message').format(invite_url=context_dict['invite_url'])
         text_content = html2plain(html_content)
 
-    MandrillMail('beta_invite.email', context=context_dict).send(
+    MandrillMail('hunger/beta_invite.email', context=context_dict).send(
         from_email=from_email,
         recipient_list=[email],
         html=html_content,
